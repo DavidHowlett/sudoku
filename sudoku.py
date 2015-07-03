@@ -12,24 +12,27 @@ initialState=[
 class Cell():
     def __init__(self,answer=None):
         self.groups = set()
-        self.neighbors = set()
         self.possible = {answer} if answer else set(range(1,10))
-        self.propergated = False
     def __repr__(self)->str:
-        return str(self.possible.copy().pop()) if len(self.possible)==1 else '_'
+        return str(self.answer()) if self.answer() else '_'
     def solved(self)->bool:
+        'returns wheather the cell is solved'
         return len(self.possible) == 1
     def answer(self)->int:
+        'returns the answer if it exists'
         return self.possible.copy().pop() if self.solved() else None
     def exclude(self,value:int):
-        self.possible.discard(value)
-        self.propagate()
+        if value in self.possible:
+            self.possible.discard(value)
+            self.propagate()
     def propagate(self):
-        if self.solved() and not self.propergated:
-            self.propergated = True
+        'this propagates the reduction in possibilitys caused by the current cell becoming certain'
+        if self.solved():
             answer = self.answer()
-            for neighbor in self.neighbors:
-                neighbor.exclude(answer)
+            for group in self.groups:
+                for neighbor in group:
+                    if not (neighbor is self):
+                        neighbor.exclude(answer)
     def check_neighbors_for_answer(self):
         '''if the union of the possible values of the neighbors in
         a group excludes a value then this cell must have that value
@@ -70,19 +73,17 @@ for i in range(9):
     row = frozenset(box[i][x] for x in range(9))
     groups.add(row)
     groups.add(column)
-    
+
 for group in groups:
     for cell in group:
         cell.groups.add(group)
-        cell.neighbors.update(group)
 
 cells = frozenset(cell for row in box for cell in row)
 # cells are not allowed to be their own neighbors
-for cell in cells:
-    cell.neighbors.remove(cell) 
 for cell in cells:
     cell.propagate() # propegate initial values
 for i in range(10):
     print_state(box)
     for cell in cells:
         cell.check_neighbors_for_answer()
+# this program is 89 lines long before optimiseation
