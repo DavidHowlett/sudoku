@@ -1,3 +1,4 @@
+#more puzzles can be found at: http://www2.warwick.ac.uk/fac/sci/moac/people/students/peter_cock/python/sudoku/
 initialState=[
 [None,1   ,2   ,None,None,None,None,5   ,7   ],
 [None,None,None,None,2   ,None,None,None,None],
@@ -24,15 +25,18 @@ class Cell():
     def exclude(self,value:int):
         if value in self.possible:
             self.possible.discard(value)
-            self.propagate()
+            if self.solved():
+                self.propagate()
     def propagate(self):
-        'this propagates the reduction in possibilitys caused by the current cell becoming certain'
-        if self.solved():
-            answer = self.answer()
-            for group in self.groups:
-                for neighbor in group:
-                    if not (neighbor is self):
-                        neighbor.exclude(answer)
+        '''call this after the cell becomes certain, it propagates the
+        reduction in possibilitys in neighbors'''
+        answer = self.answer()
+        assert answer
+        for group in self.groups:
+            for neighbor in group:
+                if not (neighbor is self):
+                    neighbor.exclude(answer)
+                    
     def check_neighbors_for_answer(self):
         '''if the union of the possible values of the neighbors in
         a group excludes a value then this cell must have that value
@@ -79,11 +83,12 @@ for group in groups:
         cell.groups.add(group)
 
 cells = frozenset(cell for row in box for cell in row)
-# cells are not allowed to be their own neighbors
+
 for cell in cells:
-    cell.propagate() # propegate initial values
-for i in range(10):
+    if cell.solved():
+        cell.propagate() # propegate initial values
+        
+for i in range(5):
     print_state(box)
     for cell in cells:
         cell.check_neighbors_for_answer()
-# this program is 89 lines long before optimiseation
