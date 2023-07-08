@@ -1,0 +1,18 @@
+[tool.black]
+target-version = ['py311']
+line-length = 120
+
+[tool.isort]
+py_version=37
+line_length = 120
+
+[tool.pylint]
+max-line-length = 120
+disable = [
+    "fixme",  # I like to leave todos in my code for more than one commit
+]
+
+[tool.ruff]
+line-length = 120
+# pyflakes, pycodestyle, isort
+select = ["F", "E", "W", "I001"]
